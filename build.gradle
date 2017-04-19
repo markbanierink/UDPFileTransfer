@@ -1,0 +1,68 @@
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'org.hidetake.ssh'
+
+group 'UDPFileTransfer'
+mainClassName = 'UDPFileTransfer.main.Main'
+version = '0.0.1'
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'UDPFileTransfer',
+                'Implementation-Version': version,
+                'Main-Class': mainClassName
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    testCompile "junit:junit:4.12"
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.hidetake:gradle-ssh-plugin:2.8.0'
+    }
+}
+
+remotes {
+    pi {
+        role 'masterNode'
+        host = '192.168.40.2'
+        user = 'pi'
+        password = 'raspberry'
+    }
+}
+
+task status {
+    doLast {
+        ssh.run {
+            session(remotes.pi) {
+                execute 'sudo systemctl status num2.service'
+            }
+        }
+    }
+}
+
+task deploy {
+    doLast {
+        ssh.run {
+            session(remotes.pi) {
+                put from: "build/libs/UDPFileTransfer-${version}.jar", into: "/home/pi/UDPFileTransfer.jar"
+                execute 'sudo systemctl restart num2.service'
+                //execute 'tail -f /var/log/syslog'
+            }
+        }
+    }
+}
+
+ssh.settings {
+    knownHosts = allowAnyHosts
+}
