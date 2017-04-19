@@ -87,6 +87,12 @@ public class Sender implements Runnable {
         transferHandler.handleUserOutput(DEBUG, transferHandler.getSenderName() + " is shut down");
     }
 
+    private void checkAckQueue() {
+
+    }
+
+
+
     private boolean isFinish() {
         return finalPacket && pendingQueue.size() == 0;
     }

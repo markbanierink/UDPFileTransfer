@@ -98,7 +98,7 @@ public class Main {
         string += DOUBLE_BAR;
         for (TransferHandler transferHandler : transferHandlers) {
             string += transferHandler.getReceiverStatisticsString();
-            string += "\n" + SINGLE_BAR;
+            string += SINGLE_BAR;
         }
         return string;
     }

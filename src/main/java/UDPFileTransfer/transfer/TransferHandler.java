@@ -170,7 +170,7 @@ public class TransferHandler {
         string += "- Retransmission percentage " + getSenderDropPercentage() + "%\n";
         string += "- Average RTT: " + getSenderAverageRTT() + " milliseconds\n";
         string += "- Duration: " + getSenderDuration() + " seconds\n";
-        string += "- Transfer speed: " + transferSpeed + " bytes/second";
+        string += "- Transfer speed: " + transferSpeed + " bytes/second\n";
         return string;
     }
 
@@ -181,7 +181,7 @@ public class TransferHandler {
         string += "- Transfer percentage: " + getReceiverTransferPercentage() + "%\n";
         string += "- Retransmission percentage " + getReceiverDropPercentage() + "%\n";
         string += "- Duration: " + getReceiverDuration() + " seconds\n";
-        string += "- Transfer speed: " + transferSpeed + " bytes/second";
+        string += "- Transfer speed: " + transferSpeed + " bytes/second\n";
         return string;
     }
 
