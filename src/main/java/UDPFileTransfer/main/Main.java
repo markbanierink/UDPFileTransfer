@@ -25,8 +25,9 @@ public class Main {
     private int port;
     private String path;
     private boolean windows = false;
+    private String inetAddress;
 
-    private static final String BROADCAST_ADDRESS = "192.168.40.2";     // TODO - temporary, should be 255, but doesn't work with cable connected
+    private static final String BROADCAST_ADDRESS = "192.168.40.255";
     public static final int DEFAULT_PORT = 8900;
 
     private Main() {
@@ -41,10 +42,16 @@ public class Main {
         if (System.getProperty("os.name").equals("Windows 10")) {
             setPath("C:\\Workspace\\UDPFileTransfer\\files\\");
             windows = true;
+            inetAddress = "192.168.40.12";      // Only used for knowing its own IP
         }
         else {
             setPath("/home/pi/files/");
+            inetAddress = "192.168.40.2";       // Only used for knowing its own IP
         }
+    }
+
+    public String getOwnIPAddress() {
+        return inetAddress;
     }
 
     private void setPath(String path) {
@@ -73,11 +80,25 @@ public class Main {
     }
 
     public String getStatusViews() {
-        String string = "STATUS\n";
+        return getStatusSender() + "\n\n\n" + getStatusReceiver();
+    }
+
+    public String getStatusSender() {
+        String string = "STATUS SENDER\n";
         string += DOUBLE_BAR;
         for (TransferHandler transferHandler : transferHandlers) {
-            string += transferHandler.getSenderStatistics();
-            string += SINGLE_BAR;
+            string += transferHandler.getSenderStatisticsString();
+            string += "\n" + SINGLE_BAR;
+        }
+        return string;
+    }
+
+    public String getStatusReceiver() {
+        String string = "STATUS RECEIVER\n";
+        string += DOUBLE_BAR;
+        for (TransferHandler transferHandler : transferHandlers) {
+            string += transferHandler.getReceiverStatisticsString();
+            string += "\n" + SINGLE_BAR;
         }
         return string;
     }
@@ -93,17 +114,20 @@ public class Main {
         return newTransferHandler;
     }
 
+    public TransferHandler createTransferHandler(int port) {
+        TransferHandler newTransferHandler = new TransferHandler(this, port, mainTransferHandler.getInetAddress());
+        transferHandlers.add(newTransferHandler);
+        return newTransferHandler;
+    }
+
     private void startupMessage() {
-        handleUserOutput(USE, PROGRAM_TITLE);
-        handleUserOutput(USE, DOUBLE_BAR);
-        handleUserOutput(USE, COMMANDS);
-        handleUserOutput(USE, SINGLE_BAR);
+        handleUserOutput(DEFAULT, PROGRAM_TITLE + "\n" + DOUBLE_BAR + COMMANDS + "\n" + SINGLE_BAR);
     }
 
     public void handleUserInput(String line) {
         Command userCommand = CommandFactory.handleCommand(line);
         if (userCommand == null) {
-            handleUserOutput(USE, UNKNOWN_COMMAND);
+            handleUserOutput(DEFAULT, UNKNOWN_COMMAND);
         }
         else {
             userCommand.execute(this, getMainTransferHandler(), line);
@@ -127,7 +151,7 @@ public class Main {
         return getTransferHandler(fileName) != null;
     }
 
-    private TransferHandler getTransferHandler(String fileName) {
+    public TransferHandler getTransferHandler(String fileName) {
         for (TransferHandler transferHandler : transferHandlers) {
             if (transferHandler.getFileName().equals(fileName)) {
                 return transferHandler;
@@ -174,7 +198,7 @@ public class Main {
     }
 
     public void exit() {
-        handleUserOutput(USE, CLOSE_APPLICATION);
+        handleUserOutput(DEFAULT, CLOSE_APPLICATION);
         shutdown();
     }
 

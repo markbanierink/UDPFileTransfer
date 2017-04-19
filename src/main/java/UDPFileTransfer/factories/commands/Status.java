@@ -3,7 +3,7 @@ package UDPFileTransfer.factories.commands;
 import UDPFileTransfer.main.Main;
 import UDPFileTransfer.transfer.TransferHandler;
 
-import static UDPFileTransfer.helper.Modes.USE;
+import static UDPFileTransfer.helper.Modes.DEFAULT;
 
 /**
  * Describes the Status command
@@ -13,6 +13,6 @@ public class Status implements Command {
 
     @Override
     public void execute(Main main, TransferHandler transferHandler, String line) {
-        main.handleUserOutput(USE, main.getStatusViews());
+        main.handleUserOutput(DEFAULT, main.getStatusViews());
     }
 }

@@ -31,6 +31,11 @@ public class TransferFile {
     private TransferHandler transferHandler;
     private String hash;
     private boolean isMade = false;
+    private long startingTime = 0;
+    private long finishTime = 0;
+    private long receivedBytes = 0;
+    private long totalRTT = 0;
+    private int retransmissions = 0;
 
     public TransferFile(TransferHandler transferHandler, File file) {
         this.transferHandler = transferHandler;
@@ -44,6 +49,13 @@ public class TransferFile {
         this.hash = hash;
     }
 
+    public void initFile() {
+        Path path = Paths.get(file.getAbsolutePath());
+        byte[] fileInBytes = fileToBytes(path);
+        size = fileInBytes.length;
+        hash = bytesToHex(calculateHash(fileInBytes));
+    }
+
     public void setFile(File file) {
         this.file = file;
     }
@@ -54,13 +66,47 @@ public class TransferFile {
 
     public void addPacket(Packet packet) {
         packets.put(packet.getTransferHeader().getSequenceNumber(), packet);
+        updateStatistics(packet);
         if (packet.isFin()) {
             transferHandler.handleUserOutput(DEBUG, "Number of packets: " + packet.getTransferHeader().getSequenceNumber());
             numPackets = packet.getTransferHeader().getSequenceNumber();
         }
         if (isComplete() && !isMade) {          // Avoid double creation due to unacked packet
+            finishTime = System.currentTimeMillis();
             createFile();
         }
+    }
+
+    private void updateStatistics(Packet packet) {
+        if (packets.size() == 0) {
+            startingTime = System.currentTimeMillis();
+        }
+        if (packets.containsKey(packet.getTransferHeader().getSequenceNumber())) {
+            retransmissions++;
+        }
+        else {
+            receivedBytes += packet.getPacketData().toByteArray().length;
+        }
+    }
+
+    public int getReceivedPackets() {
+        return packets.size();
+    }
+
+    public long getReceivedBytes() {
+        return receivedBytes;
+    }
+
+    public int getRetransmissions() {
+        return retransmissions;
+    }
+
+    public long getStartingTime() {
+        return startingTime;
+    }
+
+    public long getFinishTime() {
+        return finishTime;
     }
 
     private boolean isComplete() {
@@ -79,7 +125,17 @@ public class TransferFile {
             fileBytes = mergeByteArrays(fileBytes, packetArray);
             transferHandler.handleUserOutput(DEBUG, "Merging packets " + i + "/" + packets.size() + " of file \"" + file + "\"");
         }
-        writeFile(fileBytes, file.getPath());
+        if (isInteger(fileBytes)) {
+            writeFile(fileBytes, file.getPath());
+            transferHandler.sendCommand(CLOSE,"Correct transfer of file \"" + file.getName() + "\"");
+        }
+        else {
+            transferHandler.sendCommand(CLOSE,"Transfer of file \"" + file.getName() + "\" failed");
+        }
+    }
+
+    public String getHash() {
+        return hash;
     }
 
     private void writeFile(byte[] fileBytes, String fileName) {
@@ -89,23 +145,14 @@ public class TransferFile {
             FileOutputStream fileOutputStream = new FileOutputStream(fullPath);
             fileOutputStream.write(fileBytes);
             fileOutputStream.close();
-            if (isInteger(fullPath)) {
-                transferHandler.sendCommand(CLOSE,"Correct transfer of file \"" + fileName + "\"");
-            }
-            else {
-                (new File(fullPath)).delete();
-                transferHandler.sendCommand(CLOSE,"Transfer of file \"" + fileName + "\" failed");
-            }
         }
         catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private boolean isInteger(String fullPath) {
-        Path path = Paths.get(fullPath);
-        byte[] fileInBytes = fileToBytes(path);
-        String calculatedHash = bytesToHex(calculateHash(fileInBytes));
+    private boolean isInteger(byte[] fileBytes) {
+        String calculatedHash = bytesToHex(calculateHash(fileBytes));
         return calculatedHash.equals(hash);
     }
 

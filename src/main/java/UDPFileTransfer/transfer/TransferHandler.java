@@ -62,7 +62,7 @@ public class TransferHandler {
     }
 
     public void setTransferFile(String fileName) {
-        transferFile = new TransferFile(this, new File(main.getPath() + "/" + fileName));
+        transferFile = new TransferFile(this, new File(main.getPath() + fileName));
     }
 
     public void setInetAddress(InetAddress inetAddress) {
@@ -102,9 +102,9 @@ public class TransferHandler {
 
     public void initSender() {
         sender = new Sender(this);
-        senderThread = new Thread(sender, "Sender (" + port + 1 + ")");
+        senderThread = new Thread(sender, "Sender (" + (port + 1) + ")");
         senderThread.start();
-        handleUserOutput(DEBUG, "New Sender (" + port + 1 + ")");
+        handleUserOutput(DEBUG, "New Sender (" + (port + 1) + ")");
     }
 
     public boolean removeFile(File file) {
@@ -122,49 +122,65 @@ public class TransferHandler {
         sender.addToAckQueue(packetCopy);
     }
 
-    private double getTransferPercentage() {
+    private double getSenderTransferPercentage() {
         return Math.round((double)sender.getSentBytes() / (double)getFileSize() * 100.0);
     }
 
-    private double getDropPercentage() {
-        return Math.round((double)sender.getTimeOuts() / (double)sender.getSentPackets() * 100.0);
+    private double getSenderDropPercentage() {
+        return Math.round((double)sender.getRetransmissions() / (double)sender.getSentPackets() * 100.0);
     }
 
-    private double getAverageRTT() {
+    private double getSenderAverageRTT() {
         return Math.round((double)sender.getTotalRTT() / (double)sender.getSentPackets());
     }
 
-    private double getDuration() {
+    private double getSenderDuration() {
         return ((double)sender.getFinishTime() - (double)sender.getStartingTime()) / 1000.0;
     }
 
-    private double getTransferSpeed() {
-        return Math.round((double)sender.getSentBytes() / getDuration());
+    private double getSenderTransferSpeed() {
+        return Math.round((double)sender.getSentBytes() / getSenderDuration());
+    }
+
+    private double getReceiverTransferPercentage() {
+        return Math.round((double)transferFile.getReceivedBytes() / (double)getFileSize() * 100.0);
+    }
+
+    private double getReceiverDropPercentage() {
+        return Math.round((double)transferFile.getRetransmissions() / (double)transferFile.getReceivedPackets() * 100.0);
+    }
+
+    private double getReceiverDuration() {
+        return ((double)transferFile.getFinishTime() - (double)transferFile.getStartingTime()) / 1000.0;
+    }
+
+    private double getReceiverTransferSpeed() {
+        return Math.round((double)transferFile.getReceivedBytes() / getSenderDuration());
     }
 
     private long getFileSize() {
         return transferFile.getSize();
     }
 
-    public String getSenderStatistics() {
+    public String getSenderStatisticsString() {
         String fileSize = NumberFormat.getNumberInstance(Locale.GERMAN).format(getFileSize());
-        String transferSpeed = NumberFormat.getNumberInstance(Locale.GERMAN).format(getTransferSpeed());
+        String transferSpeed = NumberFormat.getNumberInstance(Locale.GERMAN).format(getSenderTransferSpeed());
         String string = getFileName() + " (" + fileSize + " bytes):\n";
-        string += "- Transfer percentage: " + getTransferPercentage() + "%\n";
-        string += "- Drop percentage " + getDropPercentage() + "%\n";
-        string += "- Average RTT: " + getAverageRTT() + " milliseconds\n";
-        string += "- Duration: " + getDuration() + " seconds\n";
+        string += "- Transfer percentage: " + getSenderTransferPercentage() + "%\n";
+        string += "- Retransmission percentage " + getSenderDropPercentage() + "%\n";
+        string += "- Average RTT: " + getSenderAverageRTT() + " milliseconds\n";
+        string += "- Duration: " + getSenderDuration() + " seconds\n";
         string += "- Transfer speed: " + transferSpeed + " bytes/second";
         return string;
     }
 
-    public String getReceiverStatistics() {
+    public String getReceiverStatisticsString() {
         String fileSize = NumberFormat.getNumberInstance(Locale.GERMAN).format(getFileSize());
-        String transferSpeed = NumberFormat.getNumberInstance(Locale.GERMAN).format(getTransferSpeed());
+        String transferSpeed = NumberFormat.getNumberInstance(Locale.GERMAN).format(getReceiverTransferSpeed());
         String string = getFileName() + " (" + fileSize + " bytes):\n";
-        string += "- Transfer percentage: " + getTransferPercentage() + "%\n";
-        string += "- Drop percentage " + getDropPercentage() + "%\n";
-        string += "- Duration: " + getDuration() + "seconds\n";
+        string += "- Transfer percentage: " + getReceiverTransferPercentage() + "%\n";
+        string += "- Retransmission percentage " + getReceiverDropPercentage() + "%\n";
+        string += "- Duration: " + getReceiverDuration() + " seconds\n";
         string += "- Transfer speed: " + transferSpeed + " bytes/second";
         return string;
     }
@@ -231,6 +247,10 @@ public class TransferHandler {
 
     public void sendFile() {
         sender.addTransferFileToPacketQueue(transferFile);
+    }
+
+    public void sendFile(int startingPacket) {
+        sender.addTransferFileToPacketQueue(transferFile, startingPacket);
     }
 
     public String getFileName() {

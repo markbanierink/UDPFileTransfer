@@ -6,12 +6,12 @@ package UDPFileTransfer.helper;
  */
 public enum Resources {
 
-    EMPTY_LINE(""),
     SPACE(" "),
-    DOUBLE_BAR("================================================================================"),
-    SINGLE_BAR("--------------------------------------------------------------------------------"),
+    DOUBLE_BAR("=====================================================================================================\n"),
+    SINGLE_BAR("-----------------------------------------------------------------------------------------------------\n"),
     PROGRAM_TITLE(">>>>> UDP FILE TRANSFER >>>>>"),
     COMMANDS("The following commands can be used (case-insensitive):\n\n"
+            + "CONNECT <pi/local>\t\t\t\t\t\t\t\tConnect to the Pi (not necessary after startup)\n"
             + "FOLDER <pi/local>\t\t\t\t\t\t\t\tShow available files\n"
             + "UPLOAD <sourceFileName> <newFileName>\t\t\tUploadRequest a file\n"
             + "DOWNLOAD <sourceFileName> <newFileName>\t\t\tDownload a file\n"
@@ -24,14 +24,8 @@ public enum Resources {
             + "HELP\t\t\t\t\t\t\t\t\t\t\tShow this screen"),
     UNKNOWN_COMMAND("Unknown command"),
     UNKNOWN_FLAGS("Unknown message"),
-    RECEIVER_SHUTDOWN("Receiver shut down"),
-    SENDER_SHUTDOWN("Sender shut down"),
-    CONNECTED_SERVER("Connected to server"),
-    CONNECTED_CLIENT("Connected to client"),
     SENT("Sent: "),
     RECEIVED("Received: "),
-    PAUSED("Paused: "),
-    ABORTED("Aborted: "),
     FILE_NOT_EXISTS("The requested file does not exist"),
     FILE_ALREADY_EXISTS("The requested file does already exist"),
     CLOSE_APPLICATION("Closing application");

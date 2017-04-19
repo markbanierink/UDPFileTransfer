@@ -4,7 +4,7 @@ import UDPFileTransfer.main.Main;
 import UDPFileTransfer.transfer.TransferHandler;
 
 import static UDPFileTransfer.factories.flags.Flags.PAUSE;
-import static UDPFileTransfer.helper.Modes.USE;
+import static UDPFileTransfer.helper.Modes.DEFAULT;
 import static UDPFileTransfer.helper.Resources.UNKNOWN_COMMAND;
 
 /**
@@ -20,10 +20,11 @@ public class Pause implements Command {
             String fileName = splitLine[1].toLowerCase();
             if (main.isTransfer(fileName)) {
                 transferHandler.sendCommand(PAUSE, fileName);
+                transferHandler.handleUserOutput(DEFAULT, "Pausing transfer of file \"" + fileName + "\"");
             }
         }
         else {
-            main.handleUserOutput(USE, UNKNOWN_COMMAND);
+            main.handleUserOutput(DEFAULT, UNKNOWN_COMMAND);
         }
     }
 }

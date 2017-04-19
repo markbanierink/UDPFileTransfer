@@ -42,7 +42,7 @@ public class PacketHandler implements Runnable {
     private void handlePacket(Packet packet) {
         Flag flag = FlagFactory.handleFlags(transferHandler, packet);
         if (flag == null) {
-            transferHandler.handleUserOutput(USE, UNKNOWN_FLAGS);
+            transferHandler.handleUserOutput(DEFAULT, UNKNOWN_FLAGS);
         }
         else {
             flag.execute(main, transferHandler, packet);

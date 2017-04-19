@@ -5,7 +5,7 @@ import UDPFileTransfer.transfer.TransferHandler;
 import java.io.File;
 
 import static UDPFileTransfer.factories.flags.Flags.DOWNLOAD_REQUEST;
-import static UDPFileTransfer.helper.Modes.USE;
+import static UDPFileTransfer.helper.Modes.DEFAULT;
 import static UDPFileTransfer.helper.Resources.FILE_ALREADY_EXISTS;
 import static UDPFileTransfer.helper.Resources.SPACE;
 import static UDPFileTransfer.helper.Resources.UNKNOWN_COMMAND;
@@ -27,13 +27,14 @@ public class Download implements Command {
             if (!file.exists() && !main.isTransfer(newFileName)) {
                 TransferHandler newTransferHandler = main.createTransferHandler(file.getName(), main.increaseAndGetPort());
                 newTransferHandler.sendCommand(DEFAULT_PORT, DOWNLOAD_REQUEST, fileName + SPACE + newFileName);
+                transferHandler.handleUserOutput(DEFAULT, "Downloading file \"" + fileName + "\"");
             }
             else {
-                transferHandler.handleUserOutput(USE, FILE_ALREADY_EXISTS);
+                transferHandler.handleUserOutput(DEFAULT, FILE_ALREADY_EXISTS);
             }
         }
         else {
-            main.handleUserOutput(USE, UNKNOWN_COMMAND);
+            main.handleUserOutput(DEFAULT, UNKNOWN_COMMAND);
         }
     }
 }

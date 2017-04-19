@@ -24,19 +24,20 @@ public class Sender implements Runnable {
     private LinkedBlockingQueue<Packet> packetQueue = new LinkedBlockingQueue<>();
     private HashMap<Integer, Packet> pendingPackets = new HashMap<>();
 
-    private int timeout = 200;
+    private int timeout = 2000;
     private int windowSize = Integer.MAX_VALUE;
     private boolean running = true;
     private boolean finalPacket = false;
+    private boolean finished = false;
     private int packetSize;
     private long startingTime = 0;
     private long finishTime = 0;
     private int sentPackets = 0;
     private long sentBytes = 0;
     private long totalRTT = 0;
-    private int timedOut = 0;
+    private int retransmissions = 0;
 
-    private static final int THREAD_SLEEP = 5;     // Milliseconds
+    private static final int THREAD_SLEEP = 10;     // Milliseconds
     private static final int DEFAULT_PACKET_SIZE = 1400;
 
     public Sender(TransferHandler transferHandler) {
@@ -61,7 +62,7 @@ public class Sender implements Runnable {
             }
             packet = pendingQueue.poll();
             if (packet != null && isTimedOut(packet)) {
-                timedOut++;
+                retransmissions++;
                 sendDataPacket(packet);
             }
             packet = packetQueue.poll();
@@ -71,7 +72,8 @@ public class Sender implements Runnable {
                 }
                 sendDataPacket(packet);
             }
-            if (isFinish()) {
+            if (isFinish() && !finished) {
+                finished = true;
                 finishTime = System.currentTimeMillis();
             }
             try {
@@ -101,8 +103,8 @@ public class Sender implements Runnable {
         return totalRTT;
     }
 
-    public int getTimeOuts() {
-        return timedOut;
+    public int getRetransmissions() {
+        return retransmissions;
     }
 
     public long getStartingTime() {
@@ -144,18 +146,20 @@ public class Sender implements Runnable {
     }
 
     private void sendDataPacket(Packet packet) {
-        sendPacket(packet);
         packet.setTimestamp(System.currentTimeMillis());
         pendingQueue.add(packet);
         pendingPackets.put(packet.getTransferHeader().getSequenceNumber(), packet);
+        sendPacket(packet);
     }
 
     public void removeAckedPacket(Packet ackPacket) {
         int sequenceNumber = ackPacket.getTransferHeader().getSequenceNumber();
         Packet packet = pendingPackets.get(sequenceNumber);
-        updatePacketStatistics(packet, ackPacket);
-        pendingQueue.remove(packet);
-        pendingPackets.remove(sequenceNumber);
+        if (packet != null) {
+            updatePacketStatistics(packet, ackPacket);
+            pendingQueue.remove(packet);
+            pendingPackets.remove(sequenceNumber);
+        }
     }
 
     private void updatePacketStatistics(Packet packet, Packet ackPacket) {
@@ -166,6 +170,16 @@ public class Sender implements Runnable {
     public void addTransferFileToPacketQueue(TransferFile transferFile) {
         for (Packet packet : transferFile.toPacketList(getPacketSize())) {
             addToPacketQueue(packet);
+        }
+    }
+
+    public void addTransferFileToPacketQueue(TransferFile transferFile, int startingPacket) {
+        int i = 0;
+        for (Packet packet : transferFile.toPacketList(getPacketSize())) {
+            if (i >= startingPacket) {
+                addToPacketQueue(packet);
+            }
+            i++;
         }
     }
 

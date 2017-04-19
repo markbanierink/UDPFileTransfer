@@ -3,9 +3,8 @@ package UDPFileTransfer.factories.commands;
 import UDPFileTransfer.main.Main;
 import UDPFileTransfer.transfer.TransferHandler;
 
-import static UDPFileTransfer.factories.flags.Flags.FOLDER_REQUEST;
 import static UDPFileTransfer.factories.flags.Flags.REMOVE;
-import static UDPFileTransfer.helper.Modes.USE;
+import static UDPFileTransfer.helper.Modes.DEFAULT;
 import static UDPFileTransfer.helper.Resources.UNKNOWN_COMMAND;
 
 /**
@@ -20,9 +19,10 @@ public class Remove implements Command {
         if (splitLine.length == 2) {
             String fileName = splitLine[1].toLowerCase();
             transferHandler.sendCommand(REMOVE, fileName);
+            transferHandler.handleUserOutput(DEFAULT, "Removing file \"" + fileName + "\"");
         }
         else {
-            main.handleUserOutput(USE, UNKNOWN_COMMAND);
+            main.handleUserOutput(DEFAULT, UNKNOWN_COMMAND);
         }
     }
 }

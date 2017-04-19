@@ -17,12 +17,12 @@ public class Upload implements Flag {
             transferHandler.sendFile();
         }
         else {
-            String[] line = packet.getPacketData().getString().replaceAll("\u0000.*", "").split(" ");
-            if (line.length == 3) {
-                String name = line[0];
-                long size = Long.parseLong(line[1]);
-                String hash = line[2];
-                transferHandler.setTransferFile(new TransferFile(transferHandler, name, size, hash));
+            String[] splitString = packet.getPacketData().getString().replaceAll("\u0000.*", "").split(" ");
+            if (splitString.length == 3) {
+                String fileName = splitString[0];
+                long size = Long.parseLong(splitString[1]);
+                String hash = splitString[2];
+                transferHandler.setTransferFile(new TransferFile(transferHandler, fileName, size, hash));
             }
         }
     }

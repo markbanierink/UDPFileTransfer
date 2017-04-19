@@ -17,7 +17,7 @@ import static java.lang.Thread.interrupted;
 public class UserInterface implements Runnable {
 
     private Main main;
-    private Modes mode = DEBUG;
+    private Modes mode = DEFAULT;       // DEFAULT / DEBUG
     private boolean running = true;
     private boolean windows = false;
 
@@ -29,7 +29,6 @@ public class UserInterface implements Runnable {
     @Override
     public void run() {
         if (windows) {
-            mode = USE;
             String line;
             while ((line = readConsoleInput()) != null && !interrupted() && running) {
                 handleUserInput(line);

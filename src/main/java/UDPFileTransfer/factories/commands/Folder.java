@@ -4,7 +4,7 @@ import UDPFileTransfer.main.Main;
 import UDPFileTransfer.transfer.TransferHandler;
 
 import static UDPFileTransfer.factories.flags.Flags.FOLDER_REQUEST;
-import static UDPFileTransfer.helper.Modes.USE;
+import static UDPFileTransfer.helper.Modes.DEFAULT;
 import static UDPFileTransfer.helper.Resources.UNKNOWN_COMMAND;
 
 /**
@@ -26,11 +26,11 @@ public class Folder implements Command {
                 transferHandler.handleUserOutput(transferHandler.getFileNamesString(main.getPath()));
             }
             else {
-                transferHandler.handleUserOutput(USE, UNKNOWN_COMMAND);
+                transferHandler.handleUserOutput(DEFAULT, UNKNOWN_COMMAND);
             }
         }
         else {
-           transferHandler.handleUserOutput(USE, UNKNOWN_COMMAND);
+           transferHandler.handleUserOutput(DEFAULT, UNKNOWN_COMMAND);
         }
     }
 }

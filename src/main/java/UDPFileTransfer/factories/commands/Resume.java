@@ -4,8 +4,9 @@ import UDPFileTransfer.main.Main;
 import UDPFileTransfer.transfer.TransferHandler;
 
 import static UDPFileTransfer.factories.flags.Flags.RESUME;
-import static UDPFileTransfer.helper.Modes.USE;
+import static UDPFileTransfer.helper.Modes.DEFAULT;
 import static UDPFileTransfer.helper.Resources.UNKNOWN_COMMAND;
+import static UDPFileTransfer.main.Main.DEFAULT_PORT;
 
 /**
  * Describes the Resume command
@@ -19,11 +20,13 @@ public class Resume implements Command {
         if (splitLine.length == 2) {
             String fileName = splitLine[1].toLowerCase();
             if (main.isTransfer(fileName)) {
-                transferHandler.sendCommand(RESUME, fileName);
+                TransferHandler resumingTransferHandler = main.getTransferHandler(fileName);
+                resumingTransferHandler.sendCommand(DEFAULT_PORT, RESUME, fileName);
+
             }
         }
         else {
-            main.handleUserOutput(USE, UNKNOWN_COMMAND);
+            main.handleUserOutput(DEFAULT, UNKNOWN_COMMAND);
         }
 
     }

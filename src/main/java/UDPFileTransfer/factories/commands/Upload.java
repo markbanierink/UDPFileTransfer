@@ -5,7 +5,7 @@ import UDPFileTransfer.transfer.TransferHandler;
 import java.io.File;
 
 import static UDPFileTransfer.factories.flags.Flags.UPLOAD_REQUEST;
-import static UDPFileTransfer.helper.Modes.USE;
+import static UDPFileTransfer.helper.Modes.*;
 import static UDPFileTransfer.helper.Resources.*;
 
 /**
@@ -24,13 +24,14 @@ public class Upload implements Command {
             if (file != null) {
                 long fileSize = file.length();
                 transferHandler.sendCommand(UPLOAD_REQUEST, fileName + SPACE + newFileName + SPACE + fileSize);
+                transferHandler.handleUserOutput(DEFAULT, "Uploading file \"" + fileName + "\"");
             }
             else {
-                transferHandler.handleUserOutput(USE, FILE_NOT_EXISTS);
+                transferHandler.handleUserOutput(DEFAULT, FILE_NOT_EXISTS);
             }
         }
         else {
-            main.handleUserOutput(USE, UNKNOWN_COMMAND);
+            main.handleUserOutput(DEFAULT, UNKNOWN_COMMAND);
         }
     }
 }

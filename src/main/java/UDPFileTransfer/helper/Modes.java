@@ -5,7 +5,7 @@ package UDPFileTransfer.helper;
  * @author Mark Banierink
  */
 public enum Modes {
-    USE,
+    DEFAULT,
         DEBUG,
         TEST
 }
