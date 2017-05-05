@@ -15,7 +15,6 @@ public class Connect implements Flag {
     @Override
     public void execute(Main main, TransferHandler transferHandler, Packet packet) {
         String sourceAddress = packet.getDatagramPacket().getAddress().toString().substring(1);
-
         if (!sourceAddress.equals(main.getOwnIPAddress())) {
             transferHandler.setInetAddress(packet.getDatagramPacket().getAddress());
             main.handleUserOutput(DEBUG, "Connected: " + packet.getDatagramPacket().getAddress() + ":" + packet.getDatagramPacket().getPort());

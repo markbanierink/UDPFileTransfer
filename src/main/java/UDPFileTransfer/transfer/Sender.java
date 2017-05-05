@@ -37,8 +37,9 @@ public class Sender implements Runnable {
     private long totalRTT = 0;
     private int retransmissions = 0;
 
-    private static final int THREAD_SLEEP = 10;     // Milliseconds
+    private static final int THREAD_SLEEP = 2;     // Milliseconds
     private static final int DEFAULT_PACKET_SIZE = 1400;
+    private static final int SLEEP_MOMENTS = 5;
 
     public Sender(TransferHandler transferHandler) {
         this.transferHandler = transferHandler;
@@ -76,12 +77,16 @@ public class Sender implements Runnable {
                 finished = true;
                 finishTime = System.currentTimeMillis();
             }
-            try {
-                Thread.sleep(THREAD_SLEEP);
+
+            if (sentPackets % SLEEP_MOMENTS == 0) {
+                try {
+                    Thread.sleep(THREAD_SLEEP);
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
-            catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+
         }
         datagramSocket.close();
         transferHandler.handleUserOutput(DEBUG, transferHandler.getSenderName() + " is shut down");
